@@ -1,0 +1,14 @@
+
+How to reg
+{
+    "username": "moderator",
+    "email": "moderator@gmail.com",
+    "password": "12345678",
+    "role": ["moderator"]
+}
+
+Signin
+{
+    "username": "administrator",
+    "password": "qwerty123"
+}
