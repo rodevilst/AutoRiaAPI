@@ -79,23 +79,22 @@ public class AuthController {
                 signUpRequest.getEmail(),
                 passwordEncoder.encode(signUpRequest.getPassword()));
 
-        Set<String> reqRoles = signUpRequest.getRoles();
+        Set<String> reqRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
 
         if(reqRoles == null) {
             Role userRole = roleRepository
                     .findByName(ERole.ROLE_USER)
-                    .orElseThrow(()-> new RuntimeException("Error, Role USER is not found"));
+                    .orElseThrow(() -> new RuntimeException("Error, Role USER is not found"));
             roles.add(userRole);
         } else {
-            reqRoles.forEach(r ->{
+            reqRoles.forEach(r -> {
                 switch (r) {
                     case "admin":
                         Role adminRole = roleRepository
                                 .findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(()-> new RuntimeException("Error, Role ADMIN is not found"));
+                                .orElseThrow(() -> new RuntimeException("Error, Role ADMIN is not found"));
                         roles.add(adminRole);
-
                         break;
                     case "mod":
                         Role modRole = roleRepository
@@ -103,6 +102,13 @@ public class AuthController {
                                 .orElseThrow(() -> new RuntimeException("Error, Role MODERATOR is not found"));
                         roles.add(modRole);
                         break;
+                    case "seller":
+                        Role sellRole = roleRepository
+                                .findByName(ERole.ROLE_SELLER)
+                                .orElseThrow(() -> new RuntimeException("Error, Role SELLER is not found"));
+                        roles.add(sellRole);
+                        break;
+
                     default:
                         Role userRole = roleRepository
                                 .findByName(ERole.ROLE_USER)
