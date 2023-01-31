@@ -1,18 +1,20 @@
 package com.example.autoriaapi.pojo;
 
+import com.example.autoriaapi.models.Car;
+
 import java.util.Set;
 
 public class AutoSellRequest {
-    private Set<String> brand;
+    private String brand;
     private String model;
     private String price;
 
-    public Set<String> getBrand() {
+    public String getBrand() {
         return brand;
     }
 
 
-    public void setBrand(Set<String> brand) {
+    public void setBrand(String brand) {
         this.brand = brand;
     }
 

@@ -1,7 +1,9 @@
 package com.example.autoriaapi.controllers;
 
 import com.example.autoriaapi.models.Car;
-import com.example.autoriaapi.models.CarBrand;
+import com.example.autoriaapi.models.CarUser;
+import com.example.autoriaapi.models.EBrand;
+import com.example.autoriaapi.models.User;
 import com.example.autoriaapi.pojo.AutoSellRequest;
 import com.example.autoriaapi.pojo.MessageResponse;
 import com.example.autoriaapi.repository.CarRepository;
@@ -25,32 +27,30 @@ public class AutoController {
 
     public ResponseEntity autoRegister(@RequestBody AutoSellRequest autoSellRequest) {
 
-        Set<String> reqCars = autoSellRequest.getBrand();
-        Set<Car> carBrandSet = new HashSet<>();
+//        Set<String> reqCars = autoSellRequest.getBrand();
+        Set<User> owner = new HashSet<>();
 
-        Car car = new Car(autoSellRequest.getBrand(), autoSellRequest.getModel(), autoSellRequest.getPrice());
+        CarUser carUser = new CarUser(autoSellRequest.getBrand(), autoSellRequest.getModel(), autoSellRequest.getPrice());
+//        if(reqCars == null) {
+//            throw new RuntimeException("not car brand");
+//        }else{
+//
+//            reqCars.forEach(r -> {
+//                switch (r) {
+//                    case "bmw":
+//                        Car bmwcar = carRepository
+//                                .findByBrand(EBrand.BRAND_BMW)
+//                                .orElseThrow(() -> new RuntimeException("Error, BMW is not found"));
+//                        carBrandSet.add(bmwcar);
+//                        break;
+//                }
+//
+//            });
+//        }
 
-        if (autoSellRequest.getBrand() == null) {
-            Car carBrand = carRepository
-                    .findByBrand(CarBrand.BRAND_AUDI)
-                    .orElseThrow(() -> new RuntimeException("Error, Role USER is not found"));
-            carBrandSet.add(carBrand);
-        }
-        else {
-            reqCars.forEach(r -> {
-                switch (r) {
-                    case "bmw":
-                        Car BMWcar = carRepository
-                                .findByBrand(CarBrand.BRAND_BMW)
-                                .orElseThrow(() -> new RuntimeException("Error, BMW is not found"));
-                        carBrandSet.add(BMWcar);
-                        break;
-                }
 
-            });
-        }
-
-        carRepository.save(car);
+        carRepository.save(carUser);
+        carUser.setOwner(owner);
         return ResponseEntity.ok(new MessageResponse("Car CREATED"));
     }
 }

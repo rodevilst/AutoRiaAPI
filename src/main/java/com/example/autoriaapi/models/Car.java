@@ -12,19 +12,7 @@ public class Car {
     private Long id;
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private CarBrand brand;
-    private String model;
-    private String price;
-
-    private String owner;
-
-
-    public Car() {
-    }
-
-    public Car(Set<String> brand, String model, String price) {
-
-    }
+    private EBrand brand;
 
     public Long getId() {
         return id;
@@ -34,35 +22,14 @@ public class Car {
         this.id = id;
     }
 
-    public CarBrand getBrand() {
+    public EBrand getBrand() {
         return brand;
     }
 
-    public void setBrand(CarBrand brand) {
+    public void setBrand(EBrand brand) {
         this.brand = brand;
     }
-
-    public String getModel() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
-    }
-
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
 }
+
+
+

@@ -1,5 +1,7 @@
 package com.example.autoriaapi.pojo;
 
+import com.example.autoriaapi.models.ERole;
+
 import java.util.Set;
 
 public class SignUpRequest {

@@ -1,6 +1,6 @@
 package com.example.autoriaapi.models;
 
-public enum CarBrand {
+public enum EBrand {
     BRAND_TOYOYA,
     BRAND_AUDI,
     BRAND_BMW,
