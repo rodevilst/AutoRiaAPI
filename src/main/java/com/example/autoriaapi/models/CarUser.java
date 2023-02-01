@@ -10,18 +10,19 @@ public class CarUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+@Column(name = "brand")
     private String brand;
+@Column(name = "model")
     private String model;
     private String price;
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "car_owner",
-            joinColumns = @JoinColumn(name = "car_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-//            JoinColumns = @JoinColumn(name = "user_id")
-            )
-    @JoinColumn(name = "user_id")
-    private Set<User> owner = new HashSet<>();
+//    @OneToMany(fetch = FetchType.EAGER)
+//    @JoinTable(name = "car_owner",
+//            joinColumns = @JoinColumn(name = "car_id"),
+//            inverseJoinColumns = @JoinColumn(name = "user_id")
+////            JoinColumns = @JoinColumn(name = "user_id")
+//            )
+//    @JoinColumn(name = "user_id")
+//    private Set<User> owner = new HashSet<>();
 
     public CarUser(String brand, String model, String price) {
         this.brand = brand;
@@ -65,11 +66,11 @@ public class CarUser {
         this.price = price;
     }
 
-    public Set<User> getOwner() {
-        return owner;
-    }
-
-    public void setOwner(Set<User> owner) {
-        this.owner = owner;
-    }
+//    public Set<User> getOwner() {
+//        return owner;
+//    }
+//
+//    public void setOwner(Set<User> owner) {
+//        this.owner = owner;
+//    }
 }
