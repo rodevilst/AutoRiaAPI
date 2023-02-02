@@ -48,10 +48,11 @@ public class AutoController {
         return new ResponseEntity<>(carRepository.findByBrand(brand),HttpStatus.OK);
     }
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('MODERATOR')")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('MODER')")
     public void deleteCar(@PathVariable long id) {
         carRepository.deleteById(id);
     }
+
 
 
 

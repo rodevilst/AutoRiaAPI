@@ -24,22 +24,6 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
-//    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-//    private CarUser caruser;
-
-//    public CarUser getCarUser() {
-//        return caruser;
-//    }
-//
-//    public void setCarUser(CarUser carUser) {
-//        this.caruser = carUser;
-//    }
-
-//    @ManyToMany(fetch = FetchType.EAGER)
-//    @JoinTable(name = "car_owner",
-//            joinColumns = @JoinColumn(name = "user_id"),
-//            inverseJoinColumns = @JoinColumn(name = "car_id"))
-//    private Set<Car> cars = new HashSet<>();
 
     public User() {
     }

@@ -10,9 +10,9 @@ public class CarUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-@Column(name = "brand")
+//@Column(name = "brand")
     private String brand;
-@Column(name = "model")
+//@Column(name = "model")
     private String model;
     private String price;
 //    @OneToMany(fetch = FetchType.EAGER)

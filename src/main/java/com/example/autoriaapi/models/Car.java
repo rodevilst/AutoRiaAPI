@@ -10,9 +10,8 @@ public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private EBrand brand;
+    private String brand;
 
     public Long getId() {
         return id;
@@ -22,11 +21,11 @@ public class Car {
         this.id = id;
     }
 
-    public EBrand getBrand() {
+    public String getBrand() {
         return brand;
     }
 
-    public void setBrand(EBrand brand) {
+    public void setBrand(String brand) {
         this.brand = brand;
     }
 }
