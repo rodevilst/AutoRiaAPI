@@ -8,6 +8,7 @@ public class AutoSellRequest {
     private String brand;
     private String model;
     private String price;
+    private Set<String> owner;
 
     public String getBrand() {
         return brand;
@@ -32,5 +33,13 @@ public class AutoSellRequest {
 
     public void setPrice(String price) {
         this.price = price;
+    }
+
+    public Set<String> getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Set<String> owner) {
+        this.owner = owner;
     }
 }

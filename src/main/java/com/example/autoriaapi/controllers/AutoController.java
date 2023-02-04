@@ -29,9 +29,7 @@ public class AutoController {
     public ResponseEntity autoRegister(@RequestBody AutoSellRequest autoSellRequest) {
 
         Set<User> owner = new HashSet<>();
-
         CarUser carUser = new CarUser(autoSellRequest.getBrand(), autoSellRequest.getModel(), autoSellRequest.getPrice());
-
 
         carRepository.save(carUser);
 //        carUser.setOwner(owner);

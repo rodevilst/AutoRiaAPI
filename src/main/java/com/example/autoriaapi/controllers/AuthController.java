@@ -10,8 +10,11 @@ import com.example.autoriaapi.pojo.MessageResponse;
 import com.example.autoriaapi.pojo.SignUpRequest;
 import com.example.autoriaapi.repository.RoleRepository;
 import com.example.autoriaapi.repository.UserRepository;
+import com.example.autoriaapi.service.UserDTO;
 import com.example.autoriaapi.service.UserDetailsImpl;
+import com.example.autoriaapi.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,11 +22,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -32,6 +34,8 @@ import java.util.stream.Collectors;
 public class AuthController {
     @Autowired
     AuthenticationManager authenticationManager;
+    UserDetailsImpl userDetails;
+    UserDetailsServiceImpl service;
     @Autowired
     UserRepository userRepository;
     @Autowired
@@ -40,7 +44,9 @@ public class AuthController {
     PasswordEncoder passwordEncoder;
     @Autowired
     JwtUtils jwtUtils;
-    ERole eRole;
+    UserDTO userDTO;
+    Role role;
+    User user;
 
     @PostMapping("/signin")
     public ResponseEntity<?> authUser(@RequestBody LoginRequest loginRequest) {
@@ -65,32 +71,6 @@ public class AuthController {
                 roles));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/modreg")
-    public ResponseEntity<?> registerModer(@RequestBody SignUpRequest signUpRequest) {
-        Set<Role> roles = new HashSet<>();
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is exist"));
-        }
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error : Email is exist"));
-        }
-        User user = new User(signUpRequest.getUsername(),
-                signUpRequest.getEmail(),
-                passwordEncoder.encode(signUpRequest.getPassword()));
-        Role modeRole = roleRepository
-                .findByName(ERole.ROLE_MODER)
-                .orElseThrow(() -> new RuntimeException("Error, Role MODER is not found"));
-        roles.add(modeRole);
-        user.setRoles(roles);
-        userRepository.save(user);
-        return ResponseEntity.ok(new MessageResponse("User CREATED"));
-    }
-
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody SignUpRequest signUpRequest) {
 
@@ -108,7 +88,7 @@ public class AuthController {
                 signUpRequest.getEmail(),
                 passwordEncoder.encode(signUpRequest.getPassword()));
 
-        Set<String> reqRoles = signUpRequest.getRole();
+        Set<String> reqRoles = signUpRequest.getRoles();
         Set<Role> roles = new HashSet<>();
 
         if (reqRoles == null) {
@@ -124,28 +104,25 @@ public class AuthController {
                                 .findByName(ERole.ROLE_ADMIN)
                                 .orElseThrow(() -> new RuntimeException("Error, Role ADMIN is not found"));
                         roles.add(adminRole);
-                        break;
-                    case "seller":
-                        Role sellRole = roleRepository
-                                .findByName(ERole.ROLE_SELLER)
-                                .orElseThrow(() -> new RuntimeException("Error, Role SELLER is not found"));
-                        roles.add(sellRole);
+
                         break;
                     case "mod":
                         Role modRole = roleRepository
                                 .findByName(ERole.ROLE_MODER)
-                                .orElseThrow(() -> new RuntimeException("Error, Role MODER is not found"));
+                                .orElseThrow(() -> new RuntimeException("Error, Role MODERATOR is not found"));
+                        roles.add(modRole);
                         break;
-//                    case "moder":
-//                        Role moderRole = roleRepository
-//                                .findByName(ERole.ROLE_MODER)
-//                                .orElseThrow(() -> new RuntimeException("Error, Role MODERATOR is not found"));
-//                        roles.add(moderRole);
-//                        break;
-                    default:
+                    case "seller":
+                        Role sellerRole = roleRepository
+                                .findByName(ERole.ROLE_SELLER)
+                                .orElseThrow(() -> new RuntimeException("Error, Role MODERATOR is not found"));
+                        roles.add(sellerRole);
+                        break;
+                    case "user":
                         Role userRole = roleRepository
                                 .findByName(ERole.ROLE_USER)
                                 .orElseThrow(() -> new RuntimeException("Error, Role USER is not found"));
+                        roles.add(userRole);
                         break;
                 }
             });
@@ -154,4 +131,42 @@ public class AuthController {
         userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse("User CREATED"));
     }
+
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @PatchMapping("/modreg/{id}")
+//    public void setUserToModer(@PathVariable long id, @RequestBody UserDTO userDTO,@RequestParam Map<String,String> form ) {
+//        Role user = roleRepository.findById(id).get();
+//        user.setName(userDTO.getRoleSet());
+//        roleRepository.save(user);
+//    }
+
+
+//    @PostMapping("/modreg/{id}")
+//        public String usersave(@RequestParam Map<String,String> form,
+//                               @RequestParam("id")User user,
+//                               @PathVariable long id){
+//
+//        Set<String> roles = Arrays.stream(ERole.values()).map(ERole::name).collect(Collectors.toSet());
+//        user.getRoles().clear();
+//        for (String key : form.keySet()) {
+//            if(roles.contains(key)) {
+//                user.getRoles().add(Role.valueOf(key));
+//            }
+//        }
+//        userRepository.save(user);
+//        return null;
+//
+//
+//
+//    }
+
+
+//    @GetMapping("/modreg/{id}")
+//    public String editUser(@PathVariable("id") Long id, Model model) {
+//        User user = service.get(id);
+//        List<Role> roles = service.getRoles();
+//        model.addAllAttributes("user", user);
+//        return null;
+//    }
 }
+

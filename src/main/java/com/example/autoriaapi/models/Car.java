@@ -2,9 +2,8 @@ package com.example.autoriaapi.models;
 
 import javax.persistence.*;
 import java.util.Set;
-
 @Entity
-@Table(name = "cars")
+@Table(name = "idCar")
 public class Car {
 
     @Id

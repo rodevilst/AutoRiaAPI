@@ -1,14 +1,12 @@
 package com.example.autoriaapi.pojo;
 
-import com.example.autoriaapi.models.ERole;
-
 import java.util.Set;
 
 public class SignUpRequest {
 
     private String username;
     private String email;
-    private Set<String> role;
+    private Set<String> roles;
     private String password;
 
     public String getUsername() {
@@ -27,12 +25,12 @@ public class SignUpRequest {
         this.email = email;
     }
 
-    public Set<String> getRole() {
-        return role;
+    public Set<String> getRoles() {
+        return roles;
     }
 
-    public void setRole(Set<String> role) {
-        this.role = role;
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
     }
 
     public String getPassword() {

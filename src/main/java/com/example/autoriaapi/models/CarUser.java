@@ -1,28 +1,27 @@
 package com.example.autoriaapi.models;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.Set;
 
 @Entity
-@Table(name = "user_cars")
+@Table(name = "cars")
 public class CarUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-//@Column(name = "brand")
     private String brand;
-//@Column(name = "model")
     private String model;
     private String price;
-//    @OneToMany(fetch = FetchType.EAGER)
-//    @JoinTable(name = "car_owner",
-//            joinColumns = @JoinColumn(name = "car_id"),
-//            inverseJoinColumns = @JoinColumn(name = "user_id")
-////            JoinColumns = @JoinColumn(name = "user_id")
-//            )
-//    @JoinColumn(name = "user_id")
-//    private Set<User> owner = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+
 
     public CarUser(String brand, String model, String price) {
         this.brand = brand;
@@ -30,7 +29,12 @@ public class CarUser {
         this.price = price;
     }
 
+    public CarUser(User user) {
+        this.user = user;
+    }
+
     public CarUser() {
+
     }
 
 
@@ -66,7 +70,14 @@ public class CarUser {
         this.price = price;
     }
 
-//    public Set<User> getOwner() {
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+    //    public Set<User> getOwner() {
 //        return owner;
 //    }
 //

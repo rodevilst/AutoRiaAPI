@@ -1,5 +1,7 @@
 package com.example.autoriaapi.service;
 
+import com.example.autoriaapi.models.Car;
+import com.example.autoriaapi.models.CarUser;
 import com.example.autoriaapi.models.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.config.core.GrantedAuthorityDefaults;
@@ -41,7 +43,6 @@ public class UserDetailsImpl implements UserDetails {
                 user.getPassword(),
                 authorities);
     }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;

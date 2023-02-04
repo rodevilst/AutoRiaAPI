@@ -1,9 +1,11 @@
 package com.example.autoriaapi.models;
 
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "users",
@@ -11,7 +13,7 @@ import java.util.Set;
                 @UniqueConstraint(columnNames = "username"),
                 @UniqueConstraint(columnNames = "email")
         })
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,6 +27,9 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<CarUser> cars;
+
     public User() {
     }
 
@@ -32,6 +37,10 @@ public class User {
         this.username = username;
         this.email = email;
         this.password = password;
+    }
+    public void addCar(CarUser carUser) {
+        carUser.setUser(this);
+        cars.add(carUser);
     }
 
     public Long getId() {
@@ -46,6 +55,26 @@ public class User {
         return username;
     }
 
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
+
     public void setUsername(String username) {
         this.username = username;
     }
@@ -56,6 +85,11 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
     }
 
     public String getPassword() {
@@ -74,11 +108,14 @@ public class User {
         this.roles = roles;
     }
 
-//    public Set<Car> getCars() {
-//        return cars;
-//    }
-//
-//    public void setCars(Set<Car> cars) {
-//        this.cars = cars;
+    public List<CarUser> getCars() {
+        return cars;
+    }
+
+    public void setCars(List<CarUser> cars) {
+        this.cars = cars;
+    }
+//    public void addAuto(CarUser carUser) {
+//        carUser.remove(carUser);
 //    }
 }
