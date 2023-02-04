@@ -10,11 +10,7 @@ import com.example.autoriaapi.pojo.MessageResponse;
 import com.example.autoriaapi.pojo.SignUpRequest;
 import com.example.autoriaapi.repository.RoleRepository;
 import com.example.autoriaapi.repository.UserRepository;
-import com.example.autoriaapi.service.UserDTO;
 import com.example.autoriaapi.service.UserDetailsImpl;
-import com.example.autoriaapi.service.UserDetailsServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,7 +18,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -32,22 +27,17 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthController {
-    @Autowired
-    AuthenticationManager authenticationManager;
-    UserDetailsImpl userDetails;
-    UserDetailsServiceImpl service;
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    RoleRepository roleRepository;
-    @Autowired
-    PasswordEncoder passwordEncoder;
-    @Autowired
-    JwtUtils jwtUtils;
-    UserDTO userDTO;
-    Role role;
-    User user;
 
+    AuthenticationManager authenticationManager;
+
+
+    UserRepository userRepository;
+
+    RoleRepository roleRepository;
+
+    PasswordEncoder passwordEncoder;
+
+    JwtUtils jwtUtils;
     @PostMapping("/signin")
     public ResponseEntity<?> authUser(@RequestBody LoginRequest loginRequest) {
 
@@ -70,6 +60,35 @@ public class AuthController {
                 userDetails.getEmail(),
                 roles));
     }
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/signup/moder")
+    public ResponseEntity<?> registerModer(@RequestBody SignUpRequest signUpRequest) {
+        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Username is exist"));
+        }
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error : Email is exist"));
+        }
+        User user = new User(signUpRequest.getUsername(),
+                signUpRequest.getEmail(),
+                passwordEncoder.encode(signUpRequest.getPassword()));
+        Set<Role> roles = new HashSet<>();
+
+            Role modrole = roleRepository
+                    .findByName(ERole.ROLE_MODER)
+                    .orElseThrow(() -> new RuntimeException("Error, Role MODER is not found"));
+            roles.add(modrole);
+
+        user.setRoles(roles);
+        userRepository.save(user);
+        return ResponseEntity.ok(new MessageResponse("User CREATED"));
+    }
+
+
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody SignUpRequest signUpRequest) {
@@ -132,41 +151,6 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User CREATED"));
     }
 
-//    @PreAuthorize("hasRole('ADMIN')")
-//    @PatchMapping("/modreg/{id}")
-//    public void setUserToModer(@PathVariable long id, @RequestBody UserDTO userDTO,@RequestParam Map<String,String> form ) {
-//        Role user = roleRepository.findById(id).get();
-//        user.setName(userDTO.getRoleSet());
-//        roleRepository.save(user);
-//    }
-
-
-//    @PostMapping("/modreg/{id}")
-//        public String usersave(@RequestParam Map<String,String> form,
-//                               @RequestParam("id")User user,
-//                               @PathVariable long id){
-//
-//        Set<String> roles = Arrays.stream(ERole.values()).map(ERole::name).collect(Collectors.toSet());
-//        user.getRoles().clear();
-//        for (String key : form.keySet()) {
-//            if(roles.contains(key)) {
-//                user.getRoles().add(Role.valueOf(key));
-//            }
-//        }
-//        userRepository.save(user);
-//        return null;
-//
-//
-//
-//    }
-
-
-//    @GetMapping("/modreg/{id}")
-//    public String editUser(@PathVariable("id") Long id, Model model) {
-//        User user = service.get(id);
-//        List<Role> roles = service.getRoles();
-//        model.addAllAttributes("user", user);
-//        return null;
-//    }
 }
+
 
