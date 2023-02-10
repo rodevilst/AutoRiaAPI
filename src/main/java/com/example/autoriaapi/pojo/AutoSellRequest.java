@@ -7,7 +7,7 @@ import java.util.Set;
 public class AutoSellRequest {
     private String brand;
     private String model;
-    private String price;
+    private int price;
     private Set<String> owner;
 
     public String getBrand() {
@@ -27,11 +27,11 @@ public class AutoSellRequest {
         this.model = model;
     }
 
-    public String getPrice() {
+    public int getPrice() {
         return price;
     }
 
-    public void setPrice(String price) {
+    public void setPrice(int price) {
         this.price = price;
     }
 
@@ -42,4 +42,5 @@ public class AutoSellRequest {
     public void setOwner(Set<String> owner) {
         this.owner = owner;
     }
+//    https://api.privatbank.ua/p24api/pubinfo?exchange&json&coursid=11
 }

@@ -6,5 +6,6 @@ public enum ERole {
 //    ROLE_MODERATOR ,
     ROLE_ADMIN,
 
-    ROLE_MODER
+    ROLE_MODER,
+    ROLE_UP_SELLER
 }

@@ -17,6 +17,8 @@ public interface CarRepository extends JpaRepository<CarUser, Long> {
 //    List<CarUser> getByBrand(@Param("brand") String brand);
     @Query("select c from CarUser c where c.brand=:brand")
     List<CarUser> findByBrand(@Param("brand") String brand);
+    @Query("select c from CarUser c where c.price=:price")
+    List<CarUser> getMiddle(@Param("price")String price);
 
 
 }

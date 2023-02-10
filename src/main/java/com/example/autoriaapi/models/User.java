@@ -1,12 +1,13 @@
 package com.example.autoriaapi.models;
 
 
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.*;
-
+@Data
 @Entity
 @Table(name = "users",
         uniqueConstraints = {
@@ -25,7 +26,7 @@ public class User implements UserDetails {
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
+    private Collection<Role> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<CarUser> cars;
@@ -100,11 +101,11 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public Set<Role> getRoles() {
+    public Collection<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<Role> roles) {
+    public void setRoles(Collection<Role> roles) {
         this.roles = roles;
     }
 
@@ -114,6 +115,9 @@ public class User implements UserDetails {
 
     public void setCars(List<CarUser> cars) {
         this.cars = cars;
+    }
+
+    public void setRoles(ERole roleUpSeller) {
     }
 //    public void addAuto(CarUser carUser) {
 //        carUser.remove(carUser);

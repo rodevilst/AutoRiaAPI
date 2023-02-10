@@ -1,7 +1,10 @@
 package com.example.autoriaapi.models;
 
+import lombok.Data;
+
 import javax.persistence.*;
 import java.util.Set;
+@Data
 @Entity
 @Table(name = "idCar")
 public class Car {

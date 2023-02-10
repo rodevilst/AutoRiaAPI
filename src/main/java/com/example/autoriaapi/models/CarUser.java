@@ -1,12 +1,13 @@
 package com.example.autoriaapi.models;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Set;
-
+@Data
 @Entity
 @Table(name = "cars")
 public class CarUser {
@@ -15,7 +16,7 @@ public class CarUser {
     private Long id;
     private String brand;
     private String model;
-    private String price;
+    private int price;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -23,7 +24,7 @@ public class CarUser {
 
 
 
-    public CarUser(String brand, String model, String price) {
+    public CarUser(String brand, String model, int price) {
         this.brand = brand;
         this.model = model;
         this.price = price;
@@ -62,11 +63,11 @@ public class CarUser {
         this.model = model;
     }
 
-    public String getPrice() {
+    public int getPrice() {
         return price;
     }
 
-    public void setPrice(String price) {
+    public void setPrice(int price) {
         this.price = price;
     }
 

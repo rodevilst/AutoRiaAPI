@@ -10,7 +10,9 @@ import com.example.autoriaapi.pojo.MessageResponse;
 import com.example.autoriaapi.pojo.SignUpRequest;
 import com.example.autoriaapi.repository.RoleRepository;
 import com.example.autoriaapi.repository.UserRepository;
+import com.example.autoriaapi.service.UserDTO;
 import com.example.autoriaapi.service.UserDetailsImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,17 +29,22 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthController {
-
+    @Autowired
     AuthenticationManager authenticationManager;
 
+    @Autowired
 
     UserRepository userRepository;
+    @Autowired
 
     RoleRepository roleRepository;
+    @Autowired
 
     PasswordEncoder passwordEncoder;
+    @Autowired
 
     JwtUtils jwtUtils;
+
     @PostMapping("/signin")
     public ResponseEntity<?> authUser(@RequestBody LoginRequest loginRequest) {
 
@@ -60,6 +67,7 @@ public class AuthController {
                 userDetails.getEmail(),
                 roles));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/signup/moder")
     public ResponseEntity<?> registerModer(@RequestBody SignUpRequest signUpRequest) {
@@ -78,16 +86,15 @@ public class AuthController {
                 passwordEncoder.encode(signUpRequest.getPassword()));
         Set<Role> roles = new HashSet<>();
 
-            Role modrole = roleRepository
-                    .findByName(ERole.ROLE_MODER)
-                    .orElseThrow(() -> new RuntimeException("Error, Role MODER is not found"));
-            roles.add(modrole);
+        Role modrole = roleRepository
+                .findByName(ERole.ROLE_MODER)
+                .orElseThrow(() -> new RuntimeException("Error, Role MODER is not found"));
+        roles.add(modrole);
 
         user.setRoles(roles);
         userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse("User CREATED"));
     }
-
 
 
     @PostMapping("/signup")
@@ -150,7 +157,6 @@ public class AuthController {
         userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse("User CREATED"));
     }
-
 }
 
 

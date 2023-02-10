@@ -2,10 +2,12 @@ package com.example.autoriaapi.models;
 
 
 
+import lombok.Data;
+
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Set;
-
+@Data
 @Entity
 @Table(name = "roles")
 public class Role  {
@@ -17,8 +19,8 @@ public class Role  {
     private ERole name;
 
     @Transient
-    @ManyToMany
-    private Set<User> users;
+    @ManyToMany(mappedBy = "roles")
+    private Collection<User> users;
     @ManyToMany
     @JoinTable(
             name = "roles_privileges",

@@ -12,8 +12,22 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDTO {
-private ERole roleSet;
-private String username;
+    private Set<String> roles;
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public Set<Role> setRoles(Set<String> roles) {
+        this.roles = roles;
+        return null;
+    }
+
+    public Set<Role> setRoles(ERole roleUpdateSeller) {
+        return null;
+    }
+
+    //private String username;
 
 
 }

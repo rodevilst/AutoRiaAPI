@@ -11,9 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/car")
@@ -21,7 +20,9 @@ import java.util.Set;
 public class AutoController {
     @Autowired
     CarRepository carRepository;
+
     CarUser carUser;
+    String price;
 
     @PostMapping("/seller")
     @PreAuthorize("hasRole('SELLER')")
@@ -35,25 +36,46 @@ public class AutoController {
 //        carUser.setOwner(owner);
         return ResponseEntity.ok(new MessageResponse("Car CREATED"));
     }
+
     @GetMapping("/allcar")
-   public ResponseEntity<List<CarUser>> getAllCar() {
+    public ResponseEntity<List<CarUser>> getAllCar() {
         List<CarUser> all = carRepository.findAll();
         return new ResponseEntity<>(all, HttpStatus.valueOf(200));
     }
 
     @GetMapping("/{brand}")
     public ResponseEntity<List<CarUser>> getCarsByBrand(@PathVariable String brand) {
-        return new ResponseEntity<>(carRepository.findByBrand(brand),HttpStatus.OK);
+        return new ResponseEntity<>(carRepository.findByBrand(brand), HttpStatus.OK);
     }
+
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('MODERATOR') or hasRole('MODER')")
+    @PreAuthorize("hasRole('MODER')")
     public void deleteCar(@PathVariable long id) {
         carRepository.deleteById(id);
     }
 
 
 
-
+    // for seller++
+    @GetMapping("/{brand}/mid")
+    public OptionalDouble getMiddlePrice(@PathVariable String brand) {
+        int i = 0;
+        List<CarUser> byBrand = carRepository.findByBrand(brand);
+        ArrayList<Integer> integers = new ArrayList<>();
+        for (i = 0; i < byBrand.size(); i++) {
+            int price1 = byBrand.get(i).getPrice();
+            integers.add(price1);
+        }
+        System.out.println(integers);
+        OptionalDouble average = integers.stream().mapToInt(e -> e).average();
+        System.out.println(average);
+        return average;
     }
+
+
+
+}
+
+
 
 
