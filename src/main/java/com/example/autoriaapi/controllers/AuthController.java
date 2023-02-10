@@ -4,10 +4,7 @@ import com.example.autoriaapi.configs.jwt.JwtUtils;
 import com.example.autoriaapi.models.ERole;
 import com.example.autoriaapi.models.Role;
 import com.example.autoriaapi.models.User;
-import com.example.autoriaapi.pojo.JwtResponse;
-import com.example.autoriaapi.pojo.LoginRequest;
-import com.example.autoriaapi.pojo.MessageResponse;
-import com.example.autoriaapi.pojo.SignUpRequest;
+import com.example.autoriaapi.pojo.*;
 import com.example.autoriaapi.repository.RoleRepository;
 import com.example.autoriaapi.repository.UserRepository;
 import com.example.autoriaapi.service.UserDTO;
@@ -22,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,6 +42,7 @@ public class AuthController {
     @Autowired
 
     JwtUtils jwtUtils;
+
 
     @PostMapping("/signin")
     public ResponseEntity<?> authUser(@RequestBody LoginRequest loginRequest) {
@@ -156,6 +155,24 @@ public class AuthController {
         user.setRoles(roles);
         userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse("User CREATED"));
+    }
+
+    @GetMapping("/up/{id}")
+    public void upgradeRole(@PathVariable long id, @RequestBody UpgradeRequest upgradeRequest) {
+        List<User> userList = userRepository.findAll();
+        long i = id;
+        User user = userRepository.getOne(id);
+        System.out.println(user);
+        Set<Role> roles = new HashSet<>();
+        Role upRole = roleRepository
+                .findByName(ERole.ROLE_UP_SELLER)
+                .orElseThrow(() -> new RuntimeException("Error, Role MODERATOR is not found"));
+        user.setRoles(roles);
+        roles.add(upRole);
+        userRepository.save(user);
+
+
+
     }
 }
 

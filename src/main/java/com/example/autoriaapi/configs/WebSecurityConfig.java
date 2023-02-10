@@ -69,30 +69,8 @@ public class WebSecurityConfig  extends WebSecurityConfigurerAdapter implements 
                 .antMatchers("/api/car/**").permitAll()
                 .anyRequest().authenticated();
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-//        http.addFilterBefore(authenticationJwtTokenFilter(),UsernamePasswordAuthenticationFilter.class);
 
     }
-
-//    @Bean(name = "authenticationJwtTokenFilter")
-//    public AuthenticationJwtTokenFilter restTokenAuthenticationFilter() {
-//        RestTokenAuthenticationFilter restTokenAuthenticationFilter = new RestTokenAuthenticationFilter();
-//        tokenAuthenticationManager.setUserDetailsService(userDetailsService);
-//        restTokenAuthenticationFilter.setAuthenticationManager(tokenAuthenticationManager);
-//        return restTokenAuthenticationFilter;
-//    }
-
-//        http.addFilterBefore(UsernamePasswordAuthenticationFilter.class,authenticationJwtTokenFilter());
-//		http
-//		.authorizeRequests(authorizeRequests ->
-//				authorizeRequests
-//					.antMatchers("/board/*").hasAnyRole("MANAGER", "OPERATOR")
-//					.antMatchers("/members/*").hasRole("MANAGER")
-//					.antMatchers("/").permitAll())
-//		.httpBasic().realmName("org team")
-//		.and()
-//		.sessionManagement()
-//		.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
 
 
 }

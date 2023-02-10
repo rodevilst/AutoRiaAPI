@@ -39,6 +39,10 @@ public class User implements UserDetails {
         this.email = email;
         this.password = password;
     }
+
+    public User(Set<String> roles) {
+    }
+
     public void addCar(CarUser carUser) {
         carUser.setUser(this);
         cars.add(carUser);
