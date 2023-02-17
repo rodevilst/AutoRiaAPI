@@ -10,6 +10,7 @@ import com.example.autoriaapi.repository.UserRepository;
 import com.example.autoriaapi.service.UserDTO;
 import com.example.autoriaapi.service.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -170,9 +171,10 @@ public class AuthController {
         user.setRoles(roles);
         roles.add(upRole);
         userRepository.save(user);
-
-
-
+    }
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        return new ResponseEntity<>(userRepository.findAll(), HttpStatus.OK);
     }
 }
 

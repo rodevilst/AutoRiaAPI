@@ -27,8 +27,12 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Collection<Role> roles = new HashSet<>();
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
+//    @OneToMany(fetch = FetchType.EAGER)
+//    @JoinTable(name = "u_to_c",
+//    joinColumns = @JoinColumn(name = "user_id"),
+//    inverseJoinColumns = @JoinColumn(name = "cars_id"))
     private List<CarUser> cars;
 
     public User() {

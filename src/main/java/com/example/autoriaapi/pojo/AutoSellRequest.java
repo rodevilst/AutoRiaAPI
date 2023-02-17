@@ -1,6 +1,7 @@
 package com.example.autoriaapi.pojo;
 
 import com.example.autoriaapi.models.Car;
+import com.example.autoriaapi.models.User;
 
 import java.util.Set;
 
@@ -8,7 +9,9 @@ public class AutoSellRequest {
     private String brand;
     private String model;
     private int price;
-    private Set<String> owner;
+//    private User user;
+    private String owner;
+
 
     public String getBrand() {
         return brand;
@@ -35,12 +38,21 @@ public class AutoSellRequest {
         this.price = price;
     }
 
-    public Set<String> getOwner() {
+    public String getOwner() {
         return owner;
     }
 
-    public void setOwner(Set<String> owner) {
+    public void setOwner(String owner) {
         this.owner = owner;
     }
+
+//    public User getUser() {
+//        return user;
+//    }
+//
+//    public void setUser(User user) {
+//        this.user = user;
+//    }
+
 //    https://api.privatbank.ua/p24api/pubinfo?exchange&json&coursid=11
 }
