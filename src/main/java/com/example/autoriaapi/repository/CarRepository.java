@@ -21,4 +21,5 @@ public interface CarRepository extends JpaRepository<CarUser, Long> {
     List<CarUser> getMiddle(@Param("price")String price);
 
 
+
 }

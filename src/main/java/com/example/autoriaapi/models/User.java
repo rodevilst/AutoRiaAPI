@@ -28,7 +28,6 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Collection<Role> roles = new HashSet<>();
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
-
 //    @OneToMany(fetch = FetchType.EAGER)
 //    @JoinTable(name = "u_to_c",
 //    joinColumns = @JoinColumn(name = "user_id"),
@@ -127,7 +126,4 @@ public class User implements UserDetails {
 
     public void setRoles(ERole roleUpSeller) {
     }
-//    public void addAuto(CarUser carUser) {
-//        carUser.remove(carUser);
-//    }
 }

@@ -1,4 +1,4 @@
-package com.example.autoriaapi.configs;
+package com.example.autoriaapi.service;
 
 import com.example.autoriaapi.configs.jwt.AuthEntryPointJwt;
 import com.example.autoriaapi.configs.jwt.AuthTokenFilter;
