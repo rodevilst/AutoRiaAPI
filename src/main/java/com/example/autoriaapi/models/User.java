@@ -6,7 +6,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.*;
+
 @Data
 @Entity
 @Table(name = "users",
@@ -14,7 +16,7 @@ import java.util.*;
                 @UniqueConstraint(columnNames = "username"),
                 @UniqueConstraint(columnNames = "email")
         })
-public class User implements UserDetails {
+public class User implements UserDetails  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,11 +29,7 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Collection<Role> roles = new HashSet<>();
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
-//    @OneToMany(fetch = FetchType.EAGER)
-//    @JoinTable(name = "u_to_c",
-//    joinColumns = @JoinColumn(name = "user_id"),
-//    inverseJoinColumns = @JoinColumn(name = "cars_id"))
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<CarUser> cars;
 
     public User() {
@@ -125,5 +123,26 @@ public class User implements UserDetails {
     }
 
     public void setRoles(ERole roleUpSeller) {
+    }
+
+    public int getViewCountForDay() {
+        return cars.stream()
+                .filter(car -> car.getLastViewTime().isAfter(LocalDateTime.now().minusDays(1)))
+                .mapToInt(CarUser::getView)
+                .sum();
+    }
+
+    public int getViewCountForWeek() {
+        return cars.stream()
+                .filter(car -> car.getLastViewTime().isAfter(LocalDateTime.now().minusWeeks(1)))
+                .mapToInt(CarUser::getView)
+                .sum();
+    }
+
+    public int getViewCountForMonth() {
+        return cars.stream()
+                .filter(car -> car.getLastViewTime().isAfter(LocalDateTime.now().minusMonths(1)))
+                .mapToInt(CarUser::getView)
+                .sum();
     }
 }

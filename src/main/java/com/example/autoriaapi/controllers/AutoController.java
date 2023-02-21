@@ -1,18 +1,33 @@
 package com.example.autoriaapi.controllers;
 
 import com.example.autoriaapi.models.CarUser;
-import com.example.autoriaapi.models.ERole;
+import com.example.autoriaapi.models.Role;
 import com.example.autoriaapi.models.User;
 import com.example.autoriaapi.pojo.AutoSellRequest;
 import com.example.autoriaapi.pojo.MessageResponse;
 import com.example.autoriaapi.repository.CarRepository;
+import com.example.autoriaapi.repository.RoleRepository;
 import com.example.autoriaapi.repository.UserRepository;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import javax.json.JsonObject;
 
+
+
+
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 @RestController
@@ -23,50 +38,155 @@ public class AutoController {
     CarRepository carRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    RoleRepository roleRepository;
 
-    CarUser carUser;
-    String price;
 
     @PostMapping("/{id}/seller")
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasRole('SELLER') or hasRole('UP_SELLER')")
     public ResponseEntity<?> autoRegister(@PathVariable long id, @RequestBody AutoSellRequest autoSellRequest) {
-//        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        List<Role> allrole = roleRepository.findAll();
+        Role sell = allrole.get(2);
+        Role upSell = allrole.get(3);
+        User one = userRepository.getOne(id);
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        List<CarUser> cars = user.getCars();
-        System.out.println(cars);
-        if (user.getRoles().contains(ERole.ROLE_SELLER) && cars.size() >= 1) {
-            return ResponseEntity.badRequest().body(new MessageResponse("You are not allowed to sell more than 1 car"));
-        } else if (user.getRoles().contains(ERole.ROLE_UP_SELLER) && cars.size() >= Integer.MAX_VALUE) {
+        if (one.getCars().size() >= 1 && user.getRoles().contains(sell)) {
             return ResponseEntity.badRequest().body(new MessageResponse("You have reached the maximum number of cars"));
+        } else if (user.getRoles().contains(upSell)) {
+            CarUser carUser = new CarUser(autoSellRequest.getBrand(), autoSellRequest.getModel(), autoSellRequest.getPrice(), autoSellRequest.getCurrency(), autoSellRequest.getRegion());
+            carUser.setUser(user);
+            user.getCars().add(carUser);
+            userRepository.save(user);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
         } else {
-            CarUser carUser = new CarUser(autoSellRequest.getBrand(), autoSellRequest.getModel(), autoSellRequest.getPrice());
+            CarUser carUser = new CarUser(autoSellRequest.getBrand(), autoSellRequest.getModel(), autoSellRequest.getPrice(), autoSellRequest.getCurrency(), autoSellRequest.getRegion());
             carUser.setUser(user);
             user.getCars().add(carUser);
             userRepository.save(user);
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }
-
-
-
     }
 
+    @GetMapping("/testing/{id}")
+    public void forRole(@PathVariable long id) {
+        List<Role> allrole = roleRepository.findAll();
+        Role adm = allrole.get(0);
+        Role mod = allrole.get(1);
+        Role sell = allrole.get(2);
+        Role upSell = allrole.get(3);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Collection<Role> roles = user.getRoles();
+        if (roles.contains(adm)) {
+            System.out.println("its admin");
+        } else if (roles.contains(mod)) {
+            System.out.println("its moder");
+        } else if (roles.contains(sell)) {
+            System.out.println("its seller");
+        } else if (roles.contains(upSell)) {
+            System.out.println("its upSeller");
+        } else {
+            System.out.println("dont working");
+        }
+    }
+
+    //    @GetMapping("/allcar")
+//    public ResponseEntity<List<CarUser>> getAllCar() {
+//        return new ResponseEntity<>(carRepository.findAll(), HttpStatus.valueOf(200));
+//    }
     @GetMapping("/allcar")
-    public ResponseEntity<List<CarUser>> getAllCar() {
-        return new ResponseEntity<>(carRepository.findAll(), HttpStatus.valueOf(200));
+    public ResponseEntity<List<Map<String, Object>>> getAllCar() {
+        List<CarUser> carList = carRepository.findAll();
+        List<Map<String, Object>> carInfoList = new ArrayList<>();
+
+        for (CarUser car : carList) {
+            Map<String, Object> carInfo = new HashMap<>();
+            carInfo.put("price", car.getPrice());
+            carInfo.put("model", car.getModel());
+            carInfo.put("brand", car.getBrand());
+            carInfo.put("currency", car.getCurrency());
+            carInfoList.add(carInfo);
+        }
+
+
+        return new ResponseEntity<>(carInfoList, HttpStatus.OK);
     }
+
+//    @GetMapping("/getcar/{id}")
+//    public ResponseEntity<CarUser> getCarByidForUser(@PathVariable long id){
+////        Optional<CarUser> optionalCarUser = carRepository.findById(id);
+////        if (optionalCarUser.isPresent()) {
+////            CarUser carUser = optionalCarUser.get();
+//            return null;
+//    }
+
+
+@GetMapping("/{id}/getcars")
+public ResponseEntity<Map<String, Object>> getCarByUser(@PathVariable long id) {
+    Optional<CarUser> optionalCarUser = carRepository.findById(id);
+    if (optionalCarUser.isPresent()) {
+        CarUser carUser = optionalCarUser.get();
+        int view = carUser.getView();
+        carUser.setLastViewTime(LocalDateTime.now());
+        carUser.setView(++view);
+        carRepository.save(carUser);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("brand", carUser.getBrand());
+        response.put("model", carUser.getModel());
+        response.put("price", carUser.getPrice());
+        response.put("currency",carUser.getCurrency());
+        System.out.println(response);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    } else {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+}
+
+
+
+
 
     @GetMapping("/{brand}")
-    public ResponseEntity<List<CarUser>> getCarsByBrand(@PathVariable String brand) {
-        return new ResponseEntity<>(carRepository.findByBrand(brand), HttpStatus.OK);
+    public ResponseEntity<List<Map<String, Object>>> getCarsByBrand(@PathVariable String brand) {
+        List<CarUser> carList = carRepository.findByBrand(brand);
+        List<Map<String, Object>> carInfoList = new ArrayList<>();
+
+        for (CarUser car : carList) {
+            Map<String, Object> carInfo = new HashMap<>();
+            carInfo.put("price", car.getPrice());
+            carInfo.put("model", car.getModel());
+            carInfo.put("brand", car.getBrand());
+            carInfoList.add(carInfo);
+        }
+
+        return new ResponseEntity<>(carInfoList, HttpStatus.OK);
     }
+
+    //for seller++
+    @GetMapping("/statistic/{id}")
+    public ResponseEntity<CarUser> getCarByid(@PathVariable long id) {
+        Optional<CarUser> optionalCarUser = carRepository.findById(id);
+        if (optionalCarUser.isPresent()) {
+            CarUser carUser = optionalCarUser.get();
+            int view = carUser.getView();
+            carUser.setLastViewTime(LocalDateTime.now());
+            carUser.setView(++view);
+            carRepository.save(carUser);
+            return new ResponseEntity<>(carUser, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MODER')")
     public void deleteCar(@PathVariable long id) {
         carRepository.deleteById(id);
     }
-
 
 
     // for seller++
@@ -84,8 +204,6 @@ public class AutoController {
         System.out.println(average);
         return average;
     }
-
-
 
 }
 

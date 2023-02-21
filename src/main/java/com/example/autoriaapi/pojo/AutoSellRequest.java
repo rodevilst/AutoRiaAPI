@@ -1,6 +1,7 @@
 package com.example.autoriaapi.pojo;
 
 import com.example.autoriaapi.models.Car;
+import com.example.autoriaapi.models.Currency;
 import com.example.autoriaapi.models.User;
 
 import java.util.Set;
@@ -9,8 +10,11 @@ public class AutoSellRequest {
     private String brand;
     private String model;
     private int price;
-//    private User user;
+    private Currency currency;
     private String owner;
+    private String region;
+
+    private int view;
 
 
     public String getBrand() {
@@ -46,7 +50,30 @@ public class AutoSellRequest {
         this.owner = owner;
     }
 
-//    public User getUser() {
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public int getView() {
+        return view;
+    }
+
+    public void setView(int view) {
+        this.view = view;
+    }
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
+    }
+    //    public User getUser() {
 //        return user;
 //    }
 //
