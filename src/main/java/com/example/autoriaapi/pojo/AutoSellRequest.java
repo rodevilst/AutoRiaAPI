@@ -1,10 +1,6 @@
 package com.example.autoriaapi.pojo;
 
-import com.example.autoriaapi.models.Car;
 import com.example.autoriaapi.models.Currency;
-import com.example.autoriaapi.models.User;
-
-import java.util.Set;
 
 public class AutoSellRequest {
     private String brand;

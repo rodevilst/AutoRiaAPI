@@ -158,12 +158,12 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User CREATED"));
     }
 
+    @PreAuthorize("hasRole('SELLER')")
     @GetMapping("/up/{id}")
     public void upgradeRole(@PathVariable long id, @RequestBody UpgradeRequest upgradeRequest) {
         List<User> userList = userRepository.findAll();
         long i = id;
         User user = userRepository.getOne(id);
-        System.out.println(user);
         Set<Role> roles = new HashSet<>();
         Role upRole = roleRepository
                 .findByName(ERole.ROLE_UP_SELLER)
@@ -172,6 +172,8 @@ public class AuthController {
         roles.add(upRole);
         userRepository.save(user);
     }
+
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODER')")
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         return new ResponseEntity<>(userRepository.findAll(), HttpStatus.OK);

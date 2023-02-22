@@ -8,26 +8,13 @@ import com.example.autoriaapi.pojo.MessageResponse;
 import com.example.autoriaapi.repository.CarRepository;
 import com.example.autoriaapi.repository.RoleRepository;
 import com.example.autoriaapi.repository.UserRepository;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import javax.json.JsonObject;
 
-
-
-
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -69,6 +56,134 @@ public class AutoController {
         }
     }
 
+
+    @GetMapping("/allcar")
+    public ResponseEntity<List<Map<String, Object>>> getAllCar() {
+        List<CarUser> carList = carRepository.findAll();
+        List<Map<String, Object>> carInfoList = new ArrayList<>();
+
+        for (CarUser car : carList) {
+            Map<String, Object> carInfo = new HashMap<>();
+            carInfo.put("price", car.getPrice());
+            carInfo.put("model", car.getModel());
+            carInfo.put("brand", car.getBrand());
+            carInfo.put("currency", car.getCurrency());
+            carInfoList.add(carInfo);
+        }
+        return new ResponseEntity<>(carInfoList, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/getcars")
+    public ResponseEntity<Map<String, Object>> getCarById(@PathVariable long id) {
+        Optional<CarUser> optionalCarUser = carRepository.findById(id);
+        if (optionalCarUser.isPresent()) {
+            CarUser carUser = optionalCarUser.get();
+            int view = carUser.getView();
+            carUser.setLastViewTime(LocalDateTime.now());
+            carUser.setView(++view);
+            carRepository.save(carUser);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("brand", carUser.getBrand());
+            response.put("model", carUser.getModel());
+            response.put("price", carUser.getPrice());
+            response.put("currency", carUser.getCurrency());
+            System.out.println(response);
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/{brand}")
+    public ResponseEntity<List<Map<String, Object>>> getCarsByBrand(@PathVariable String brand) {
+        List<CarUser> carList = carRepository.findByBrand(brand);
+        List<Map<String, Object>> carInfoList = new ArrayList<>();
+
+        for (CarUser car : carList) {
+            Map<String, Object> carInfo = new HashMap<>();
+            carInfo.put("price", car.getPrice());
+            carInfo.put("model", car.getModel());
+            carInfo.put("brand", car.getBrand());
+            carInfoList.add(carInfo);
+        }
+        return new ResponseEntity<>(carInfoList, HttpStatus.OK);
+    }
+
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MODER')")
+    public void deleteCar(@PathVariable long id) {
+        carRepository.deleteById(id);
+    }
+
+
+    @GetMapping("/region/{region}")
+    public ResponseEntity<List<Map<String, Object>>> getCarsByRegion(@PathVariable String region) {
+        List<CarUser> carList = carRepository.getByRegion(region);
+
+        List<Map<String, Object>> carInfoList = carList.stream()
+                .map(car -> {
+                    Map<String, Object> carInfo = new HashMap<>();
+                    carInfo.put("price", car.getPrice());
+                    carInfo.put("model", car.getModel());
+                    carInfo.put("brand", car.getBrand());
+                    carInfo.put("currency", car.getCurrency());
+                    return carInfo;
+                })
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(carInfoList, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasRole('UP_SELLER')")
+    @GetMapping("/region/midprice/{region}/{brand}")
+    public ResponseEntity<Map<String, Double>> getMidPriceByRegionAndBrand(@PathVariable String region, @PathVariable String brand) {
+        List<CarUser> carList = carRepository.findByRegionAndBrand(region, brand);
+
+        DoubleSummaryStatistics stats = carList.stream()
+                .mapToDouble(CarUser::getPrice)
+                .summaryStatistics();
+
+        Map<String, Double> response = new HashMap<>();
+        response.put("averagePrice", stats.getAverage());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasRole('UP_SELLER')")
+    @GetMapping("/statistic/{id}")
+    public ResponseEntity<CarUser> getCarByid(@PathVariable long id) {
+        Optional<CarUser> optionalCarUser = carRepository.findById(id);
+        if (optionalCarUser.isPresent()) {
+            CarUser carUser = optionalCarUser.get();
+//            int view = carUser.getView();
+//            carUser.setLastViewTime(LocalDateTime.now());
+//            carUser.setView(++view);
+//            carRepository.save(carUser);
+            return new ResponseEntity<>(carUser, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PreAuthorize("hasRole('UP_SELLER')")
+    @GetMapping("/{brand}/mid")
+    public OptionalDouble getMiddlePrice(@PathVariable String brand) {
+        int i = 0;
+        List<CarUser> byBrand = carRepository.findByBrand(brand);
+        ArrayList<Integer> integers = new ArrayList<>();
+        for (i = 0; i < byBrand.size(); i++) {
+            int price1 = byBrand.get(i).getPrice();
+            integers.add(price1);
+        }
+        System.out.println(integers);
+        OptionalDouble average = integers.stream().mapToInt(e -> e).average();
+        System.out.println(average);
+        return average;
+    }
+
     @GetMapping("/testing/{id}")
     public void forRole(@PathVariable long id) {
         List<Role> allrole = roleRepository.findAll();
@@ -91,155 +206,6 @@ public class AutoController {
             System.out.println("dont working");
         }
     }
-
-    //    @GetMapping("/allcar")
-//    public ResponseEntity<List<CarUser>> getAllCar() {
-//        return new ResponseEntity<>(carRepository.findAll(), HttpStatus.valueOf(200));
-//    }
-    @GetMapping("/allcar")
-    public ResponseEntity<List<Map<String, Object>>> getAllCar() {
-        List<CarUser> carList = carRepository.findAll();
-        List<Map<String, Object>> carInfoList = new ArrayList<>();
-
-        for (CarUser car : carList) {
-            Map<String, Object> carInfo = new HashMap<>();
-            carInfo.put("price", car.getPrice());
-            carInfo.put("model", car.getModel());
-            carInfo.put("brand", car.getBrand());
-            carInfo.put("currency", car.getCurrency());
-            carInfoList.add(carInfo);
-        }
-
-
-        return new ResponseEntity<>(carInfoList, HttpStatus.OK);
-    }
-
-//    @GetMapping("/getcar/{id}")
-//    public ResponseEntity<CarUser> getCarByidForUser(@PathVariable long id){
-////        Optional<CarUser> optionalCarUser = carRepository.findById(id);
-////        if (optionalCarUser.isPresent()) {
-////            CarUser carUser = optionalCarUser.get();
-//            return null;
-//    }
-
-
-@GetMapping("/{id}/getcars")
-public ResponseEntity<Map<String, Object>> getCarByUser(@PathVariable long id) {
-    Optional<CarUser> optionalCarUser = carRepository.findById(id);
-    if (optionalCarUser.isPresent()) {
-        CarUser carUser = optionalCarUser.get();
-        int view = carUser.getView();
-        carUser.setLastViewTime(LocalDateTime.now());
-        carUser.setView(++view);
-        carRepository.save(carUser);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("brand", carUser.getBrand());
-        response.put("model", carUser.getModel());
-        response.put("price", carUser.getPrice());
-        response.put("currency",carUser.getCurrency());
-        System.out.println(response);
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    } else {
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-}
-
-
-
-
-
-    @GetMapping("/{brand}")
-    public ResponseEntity<List<Map<String, Object>>> getCarsByBrand(@PathVariable String brand) {
-        List<CarUser> carList = carRepository.findByBrand(brand);
-        List<Map<String, Object>> carInfoList = new ArrayList<>();
-
-        for (CarUser car : carList) {
-            Map<String, Object> carInfo = new HashMap<>();
-            carInfo.put("price", car.getPrice());
-            carInfo.put("model", car.getModel());
-            carInfo.put("brand", car.getBrand());
-            carInfoList.add(carInfo);
-        }
-
-        return new ResponseEntity<>(carInfoList, HttpStatus.OK);
-    }
-
-    //for seller++
-    @GetMapping("/statistic/{id}")
-    public ResponseEntity<CarUser> getCarByid(@PathVariable long id) {
-        Optional<CarUser> optionalCarUser = carRepository.findById(id);
-        if (optionalCarUser.isPresent()) {
-            CarUser carUser = optionalCarUser.get();
-            int view = carUser.getView();
-            carUser.setLastViewTime(LocalDateTime.now());
-            carUser.setView(++view);
-            carRepository.save(carUser);
-            return new ResponseEntity<>(carUser, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('MODER')")
-    public void deleteCar(@PathVariable long id) {
-        carRepository.deleteById(id);
-    }
-
-
-    // for seller++
-    @GetMapping("/{brand}/mid")
-    public OptionalDouble getMiddlePrice(@PathVariable String brand) {
-        int i = 0;
-        List<CarUser> byBrand = carRepository.findByBrand(brand);
-        ArrayList<Integer> integers = new ArrayList<>();
-        for (i = 0; i < byBrand.size(); i++) {
-            int price1 = byBrand.get(i).getPrice();
-            integers.add(price1);
-        }
-        System.out.println(integers);
-        OptionalDouble average = integers.stream().mapToInt(e -> e).average();
-        System.out.println(average);
-        return average;
-    }
-    @GetMapping("/region/{region}")
-    public ResponseEntity<List<Map<String, Object>>> getCarsByRegion(@PathVariable String region) {
-        List<CarUser> carList = carRepository.getByRegion(region);
-
-        List<Map<String, Object>> carInfoList = carList.stream()
-                .map(car -> {
-                    Map<String, Object> carInfo = new HashMap<>();
-                    carInfo.put("price", car.getPrice());
-                    carInfo.put("model", car.getModel());
-                    carInfo.put("brand", car.getBrand());
-                    carInfo.put("currency",car.getCurrency());
-                    return carInfo;
-                })
-                .collect(Collectors.toList());
-
-        return new ResponseEntity<>(carInfoList, HttpStatus.OK);
-    }
-    @GetMapping("/region/midprice/{region}/{brand}")
-    public ResponseEntity<Map<String, Double>> getMidPriceByRegionAndBrand(@PathVariable String region, @PathVariable String brand) {
-        List<CarUser> carList = carRepository.findByRegionAndBrand(region, brand);
-
-        DoubleSummaryStatistics stats = carList.stream()
-                .mapToDouble(CarUser::getPrice)
-                .summaryStatistics();
-
-        Map<String, Double> response = new HashMap<>();
-        response.put("averagePrice", stats.getAverage());
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-
-
-
-
 }
 
 

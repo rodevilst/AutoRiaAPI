@@ -2,15 +2,10 @@ package com.example.autoriaapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Set;
-import java.util.stream.IntStream;
 
 @Data
 @Entity
@@ -36,7 +31,7 @@ public class CarUser {
     @JsonIgnore
     private User user;
 
-    public CarUser(String brand, String model, int price,Currency currency, String region) {
+    public CarUser(String brand, String model, int price, Currency currency, String region) {
         this.brand = brand;
         this.model = model;
         this.price = price;
