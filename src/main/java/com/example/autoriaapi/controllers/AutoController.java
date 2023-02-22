@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/car")
@@ -204,6 +205,40 @@ public ResponseEntity<Map<String, Object>> getCarByUser(@PathVariable long id) {
         System.out.println(average);
         return average;
     }
+    @GetMapping("/region/{region}")
+    public ResponseEntity<List<Map<String, Object>>> getCarsByRegion(@PathVariable String region) {
+        List<CarUser> carList = carRepository.getByRegion(region);
+
+        List<Map<String, Object>> carInfoList = carList.stream()
+                .map(car -> {
+                    Map<String, Object> carInfo = new HashMap<>();
+                    carInfo.put("price", car.getPrice());
+                    carInfo.put("model", car.getModel());
+                    carInfo.put("brand", car.getBrand());
+                    carInfo.put("currency",car.getCurrency());
+                    return carInfo;
+                })
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(carInfoList, HttpStatus.OK);
+    }
+    @GetMapping("/region/midprice/{region}/{brand}")
+    public ResponseEntity<Map<String, Double>> getMidPriceByRegionAndBrand(@PathVariable String region, @PathVariable String brand) {
+        List<CarUser> carList = carRepository.findByRegionAndBrand(region, brand);
+
+        DoubleSummaryStatistics stats = carList.stream()
+                .mapToDouble(CarUser::getPrice)
+                .summaryStatistics();
+
+        Map<String, Double> response = new HashMap<>();
+        response.put("averagePrice", stats.getAverage());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
+
+
 
 }
 
