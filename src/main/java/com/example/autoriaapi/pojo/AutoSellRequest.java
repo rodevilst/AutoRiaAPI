@@ -1,12 +1,12 @@
 package com.example.autoriaapi.pojo;
 
-import com.example.autoriaapi.models.Currency;
+import com.example.autoriaapi.models.ECurrency;
 
 public class AutoSellRequest {
     private String brand;
     private String model;
     private int price;
-    private Currency currency;
+    private ECurrency ECurrency;
     private String owner;
     private String region;
 
@@ -62,14 +62,15 @@ public class AutoSellRequest {
         this.view = view;
     }
 
-    public Currency getCurrency() {
-        return currency;
+    public com.example.autoriaapi.models.ECurrency getECurrency() {
+        return ECurrency;
     }
 
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
+    public void setECurrency(com.example.autoriaapi.models.ECurrency ECurrency) {
+        this.ECurrency = ECurrency;
     }
-    //    public User getUser() {
+
+//    public User getUser() {
 //        return user;
 //    }
 //

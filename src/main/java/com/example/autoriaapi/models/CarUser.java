@@ -1,9 +1,11 @@
 package com.example.autoriaapi.models;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -18,11 +20,16 @@ public class CarUser {
     private String model;
     private int price;
     @Column(name = "currency")
-    private Currency currency;
+    private ECurrency Ecurrency;
+
+//    private Currency currency;
 
     private String region;
 
     private int view;
+    private BigDecimal nationalPrice;
+    private BigDecimal usdPrice;
+    private BigDecimal eurPrice;
     @Column(name = "last_view_time")
     private LocalDateTime lastViewTime;
 
@@ -31,11 +38,11 @@ public class CarUser {
     @JsonIgnore
     private User user;
 
-    public CarUser(String brand, String model, int price, Currency currency, String region) {
+    public CarUser(String brand, String model, int price, ECurrency ECurrency, String region) {
         this.brand = brand;
         this.model = model;
         this.price = price;
-        this.currency = currency;
+        this.Ecurrency = ECurrency;
         this.region = region;
     }
 
@@ -138,5 +145,37 @@ public int getViewCountForWeek() {
     }
     public int getViews() {
         return this.getView() + this.getViewCountForWeek() + this.getViewCountForMonth();
+    }
+
+    public ECurrency getEcurrency() {
+        return Ecurrency;
+    }
+
+    public void setEcurrency(ECurrency ecurrency) {
+        Ecurrency = ecurrency;
+    }
+
+    public BigDecimal getNationalPrice() {
+        return nationalPrice;
+    }
+
+    public void setNationalPrice(BigDecimal nationalPrice) {
+        this.nationalPrice = nationalPrice;
+    }
+
+    public BigDecimal getUsdPrice() {
+        return usdPrice;
+    }
+
+    public void setUsdPrice(BigDecimal usdPrice) {
+        this.usdPrice = usdPrice;
+    }
+
+    public BigDecimal getEurPrice() {
+        return eurPrice;
+    }
+
+    public void setEurPrice(BigDecimal eurPrice) {
+        this.eurPrice = eurPrice;
     }
 }

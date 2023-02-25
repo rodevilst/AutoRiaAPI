@@ -2,8 +2,8 @@ package com.example.autoriaapi.models;
 
 
 import javax.persistence.Table;
-@Table(name = "currency")
+@Table(name = "ecurrency")
 
-public enum Currency {
+public enum ECurrency {
     USD,EUR,UAH
 }
