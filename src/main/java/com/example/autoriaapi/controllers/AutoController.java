@@ -1,16 +1,10 @@
 package com.example.autoriaapi.controllers;
 
-import com.example.autoriaapi.models.CarUser;
-import com.example.autoriaapi.models.ECurrency;
-import com.example.autoriaapi.models.Role;
-import com.example.autoriaapi.models.User;
+import com.example.autoriaapi.models.*;
 import com.example.autoriaapi.pojo.AutoSellRequest;
 import com.example.autoriaapi.pojo.Currency;
 import com.example.autoriaapi.pojo.MessageResponse;
-import com.example.autoriaapi.repository.CarRepository;
-import com.example.autoriaapi.repository.CurrencyRepository;
-import com.example.autoriaapi.repository.RoleRepository;
-import com.example.autoriaapi.repository.UserRepository;
+import com.example.autoriaapi.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -351,7 +345,6 @@ public class AutoController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-
     @PreAuthorize("hasRole('UP_SELLER')")
     @GetMapping("/{brand}/mid")
     public OptionalDouble getMiddlePrice(@PathVariable String brand) {

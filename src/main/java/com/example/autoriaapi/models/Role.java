@@ -22,6 +22,7 @@ public class Role  {
     @ManyToMany(mappedBy = "roles")
     private Collection<User> users;
 
+
     public static Role valueOf(String key) {
         return Role.valueOf(key);
     }
@@ -47,5 +48,10 @@ public class Role  {
     }
 
     public Role() {
+    }
+
+    public Role(Long id, ERole name) {
+        this.id = id;
+        this.name = name;
     }
 }
