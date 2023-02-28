@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
@@ -37,7 +38,7 @@ public class CurrencyController {
     public CurrencyController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
-
+@PostConstruct
     @GetMapping("/currency")
     public List<Currency> getCurrency() {
         Currency[] response = restTemplate.getForObject(PRIVATBANK_API_URL, Currency[].class);
