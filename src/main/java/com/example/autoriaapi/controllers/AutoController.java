@@ -37,18 +37,8 @@ public class AutoController {
     @PreAuthorize("hasRole('SELLER') or hasRole('UP_SELLER')")
     public ResponseEntity<?> autoRegister(@PathVariable long id, @RequestBody AutoSellRequest autoSellRequest) {
         List<Role> allrole = roleRepository.findAll();
-        Role sell = allrole.get(2);
-        Role upSell = allrole.get(3);
-//        List<Currency> all = currencyRepository.findAll();
-//        int size = all.size();
-//        System.out.println(size);
-//        Currency currency = all.get(0);
-//        BigDecimal sell = currency.getSale();
-//        System.out.println(sell);
-//        BigDecimal price = BigDecimal.valueOf(carUser.getPrice());
-//        System.out.println(price);
-//        BigDecimal x = sell.multiply(price);
-//        System.out.println(x);
+        Role sell = allrole.get(3);
+        Role upSell = allrole.get(4);
         List<Currency> all = currencyRepository.findAll();
         Currency eur = all.get(0);
         Currency usd = all.get(1);
