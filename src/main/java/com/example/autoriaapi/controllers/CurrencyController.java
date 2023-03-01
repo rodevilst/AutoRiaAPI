@@ -7,6 +7,7 @@ import com.example.autoriaapi.pojo.Currency;
 import com.example.autoriaapi.repository.CarRepository;
 import com.example.autoriaapi.repository.CurrencyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,7 +39,9 @@ public class CurrencyController {
     public CurrencyController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
-@PostConstruct
+
+    @PostConstruct
+    @PreAuthorize("hasRole('Admin')")
     @GetMapping("/currency")
     public List<Currency> getCurrency() {
         Currency[] response = restTemplate.getForObject(PRIVATBANK_API_URL, Currency[].class);

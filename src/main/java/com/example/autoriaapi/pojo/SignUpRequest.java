@@ -1,12 +1,18 @@
 package com.example.autoriaapi.pojo;
 
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import java.util.Set;
 
 public class SignUpRequest {
-
+    @NotBlank
     private String username;
+    @Email
     private String email;
     private Set<String> roles;
+    @NotBlank
+
     private String password;
 
     public String getUsername() {

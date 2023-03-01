@@ -4,11 +4,14 @@ import com.example.autoriaapi.models.*;
 import com.example.autoriaapi.pojo.AutoSellRequest;
 import com.example.autoriaapi.pojo.Currency;
 import com.example.autoriaapi.pojo.MessageResponse;
+import com.example.autoriaapi.pojo.SignUpRequest;
 import com.example.autoriaapi.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,9 +36,9 @@ public class AutoController {
     CurrencyRepository currencyRepository;
 
 
-    @PostMapping("/{id}/seller")
+    @PostMapping("/seller")
     @PreAuthorize("hasRole('SELLER') or hasRole('UP_SELLER')")
-    public ResponseEntity<?> autoRegister(@PathVariable long id, @RequestBody AutoSellRequest autoSellRequest) {
+    public ResponseEntity<?> autoRegister(Authentication authentication, @RequestBody AutoSellRequest autoSellRequest) {
         List<Role> allrole = roleRepository.findAll();
         Role sell = allrole.get(3);
         Role upSell = allrole.get(4);
@@ -45,10 +48,11 @@ public class AutoController {
         BigDecimal eurSale = eur.getSale();
         BigDecimal usdSale = usd.getSale();
 
-        User one = userRepository.getOne(id);
-        User user = userRepository.findById(id)
+        String currentUserName = authentication.getName();
+        User user = userRepository.findByUsername(currentUserName)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        if (one.getCars().size() >= 1 && user.getRoles().contains(sell)) {
+
+        if (user.getCars().size() >= 1 && user.getRoles().contains(sell)) {
             return ResponseEntity.badRequest().body(new MessageResponse("You have reached the maximum number of cars"));
         } else if (user.getRoles().contains(upSell)) {
             CarUser carUser = new CarUser(autoSellRequest.getBrand(), autoSellRequest.getModel(), autoSellRequest.getPrice(), autoSellRequest.getECurrency(), autoSellRequest.getRegion());
@@ -112,7 +116,7 @@ public class AutoController {
         return new ResponseEntity<>(carInfoList, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}/getcars")
+    @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getCarById(@PathVariable long id) {
         Optional<CarUser> optionalCarUser = carRepository.findById(id);
         if (optionalCarUser.isPresent()) {
@@ -135,7 +139,7 @@ public class AutoController {
         }
     }
 
-    @GetMapping("/{id}/getcars/eur")
+    @GetMapping("/{id}/eur")
     public ResponseEntity<Map<String, Object>> getCarByIdInEur(@PathVariable long id) {
         Optional<CarUser> optionalCarUser = carRepository.findById(id);
         if (optionalCarUser.isPresent()) {
@@ -177,7 +181,7 @@ public class AutoController {
         }
     }
 
-    @GetMapping("/{id}/getcars/usd")
+    @GetMapping("/{id}/usd")
     public ResponseEntity<Map<String, Object>> getCarByIdInUsd(@PathVariable long id) {
         Optional<CarUser> optionalCarUser = carRepository.findById(id);
         if (optionalCarUser.isPresent()) {
@@ -221,7 +225,7 @@ public class AutoController {
         }
     }
 
-    @GetMapping("/{id}/getcars/uah")
+    @GetMapping("/{id}/uah")
     public ResponseEntity<Map<String, Object>> getCarByIdInUah(@PathVariable long id) {
         Optional<CarUser> optionalCarUser = carRepository.findById(id);
         if (optionalCarUser.isPresent()) {
@@ -264,7 +268,7 @@ public class AutoController {
     }
 
 
-    @GetMapping("/{brand}")
+    @GetMapping("/allcars/brand/{brand}")
     public ResponseEntity<List<Map<String, Object>>> getCarsByBrand(@PathVariable String brand) {
         List<CarUser> carList = carRepository.findByBrand(brand);
         List<Map<String, Object>> carInfoList = new ArrayList<>();
@@ -287,7 +291,7 @@ public class AutoController {
     }
 
 
-    @GetMapping("/region/{region}")
+    @GetMapping("allcars/region/{region}")
     public ResponseEntity<List<Map<String, Object>>> getCarsByRegion(@PathVariable String region) {
         List<CarUser> carList = carRepository.getByRegion(region);
 
@@ -326,15 +330,12 @@ public class AutoController {
         Optional<CarUser> optionalCarUser = carRepository.findById(id);
         if (optionalCarUser.isPresent()) {
             CarUser carUser = optionalCarUser.get();
-//            int view = carUser.getView();
-//            carUser.setLastViewTime(LocalDateTime.now());
-//            carUser.setView(++view);
-//            carRepository.save(carUser);
             return new ResponseEntity<>(carUser, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
     @PreAuthorize("hasRole('UP_SELLER')")
     @GetMapping("/{brand}/mid")
     public OptionalDouble getMiddlePrice(@PathVariable String brand) {
