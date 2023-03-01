@@ -21,8 +21,8 @@ public interface CarRepository extends JpaRepository<CarUser, Long> {
     List<CarUser> getMiddle(@Param("price")String price);
     @Query("select c from CarUser c where c.region=:region")
     List<CarUser> getByRegion(@Param("region")String region);
+    @Query("select c from CarUser c where c.region=:region and c.brand=:brand")
     List<CarUser> findByRegionAndBrand(String region, String brand);
-
 
 
 

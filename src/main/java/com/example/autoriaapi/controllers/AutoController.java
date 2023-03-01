@@ -99,23 +99,6 @@ public class AutoController {
         }
     }
 
-
-    @GetMapping("/allcar")
-    public ResponseEntity<List<Map<String, Object>>> getAllCar() {
-        List<CarUser> carList = carRepository.findAll();
-        List<Map<String, Object>> carInfoList = new ArrayList<>();
-
-        for (CarUser car : carList) {
-            Map<String, Object> carInfo = new HashMap<>();
-            carInfo.put("price", car.getPrice());
-            carInfo.put("model", car.getModel());
-            carInfo.put("brand", car.getBrand());
-            carInfo.put("currency", car.getEcurrency());
-            carInfoList.add(carInfo);
-        }
-        return new ResponseEntity<>(carInfoList, HttpStatus.OK);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getCarById(@PathVariable long id) {
         Optional<CarUser> optionalCarUser = carRepository.findById(id);
@@ -139,134 +122,176 @@ public class AutoController {
         }
     }
 
-@GetMapping("/{id}/cur")
-public ResponseEntity<Map<String, Object>> getCarByIdCurrency(@PathVariable long id, @RequestParam String currency) {
-    Optional<CarUser> optionalCarUser = carRepository.findById(id);
-    if (optionalCarUser.isPresent()) {
-        CarUser carUser = optionalCarUser.get();
-        int view = carUser.getView();
-        carUser.setLastViewTime(LocalDateTime.now());
-        carUser.setView(++view);
-        carRepository.save(carUser);
+    @GetMapping("/cur/{id}")
+    public ResponseEntity<? extends Object> getCarByIdCurrency(@PathVariable long id,
+                                                               @RequestParam(required = false) String currency) {
+        Optional<CarUser> optionalCarUser = carRepository.findById(id);
+        if (optionalCarUser.isPresent()) {
+            CarUser carUser = optionalCarUser.get();
+            int view = carUser.getView();
+            carUser.setLastViewTime(LocalDateTime.now());
+            carUser.setView(++view);
+            carRepository.save(carUser);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("brand", carUser.getBrand());
-        response.put("model", carUser.getModel());
-        response.put("currency", carUser.getEcurrency().toString());
+            Map<String, Object> response = new HashMap<>();
+            response.put("brand", carUser.getBrand());
+            response.put("model", carUser.getModel());
+            response.put("currency", carUser.getEcurrency().toString());
 
-        List<Currency> all = currencyRepository.findAll();
-        Currency eur = all.get(0);
-        Currency usd = all.get(1);
-        BigDecimal eurSale = eur.getSale();
-        BigDecimal usdSale = usd.getSale();
+            List<Currency> all = currencyRepository.findAll();
+            Currency eur = all.get(0);
+            Currency usd = all.get(1);
+            BigDecimal eurSale = eur.getSale();
+            BigDecimal usdSale = usd.getSale();
+            if (currency!=null) {
+                if (currency.equalsIgnoreCase("eur")) {
+                    if (carUser.getEcurrency().equals(ECurrency.USD)) {
+                        BigDecimal usdprice = BigDecimal.valueOf(carUser.getPrice());
+                        BigDecimal uah = usdprice.multiply(usdSale);
+                        BigDecimal eurprice = uah.divide(eurSale, 2, RoundingMode.HALF_UP);
+                        response.put("price in eur:", eurprice);
+                        response.put("euro currency", eurSale);
+                        response.put("seller price in usd:", carUser.getPrice());
+                    } else if (carUser.getEcurrency().equals(ECurrency.EUR)) {
+                        response.put("price", carUser.getPrice());
+                    } else if (carUser.getEcurrency().equals(ECurrency.UAH)) {
+                        BigDecimal uahprice = BigDecimal.valueOf(carUser.getPrice());
+                        BigDecimal divide = uahprice.divide(eurSale, 2, RoundingMode.HALF_UP);
+                        response.put("price in eur:", divide);
+                        response.put("euro currency", eurSale);
+                        response.put("seller price in UAH:", carUser.getPrice());
+                    }
+                } else if (currency.equalsIgnoreCase("usd")) {
+                    if (carUser.getEcurrency().equals(ECurrency.USD)) {
+                        response.put("price", carUser.getPrice());
+                    } else if (carUser.getEcurrency().equals(ECurrency.EUR)) {
+                        BigDecimal eurprice = BigDecimal.valueOf(carUser.getPrice());
+                        BigDecimal uahprice = eurprice.multiply(eurSale);
+                        BigDecimal usdprice = uahprice.divide(usdSale, 2, RoundingMode.HALF_UP);
+                        response.put("price in usd:", usdprice);
+                        response.put("usd currency", usdSale);
+                        response.put("seller price in eur:", carUser.getPrice());
 
-        if (currency.equalsIgnoreCase("eur")) {
-            if (carUser.getEcurrency().equals(ECurrency.USD)) {
-                BigDecimal usdprice = BigDecimal.valueOf(carUser.getPrice());
-                BigDecimal uah = usdprice.multiply(usdSale);
-                BigDecimal eurprice = uah.divide(eurSale, 2, RoundingMode.HALF_UP);
-                response.put("price in eur:", eurprice);
-                response.put("euro currency", eurSale);
-                response.put("seller price in usd:", carUser.getPrice());
-            } else if (carUser.getEcurrency().equals(ECurrency.EUR)) {
+                    } else if (carUser.getEcurrency().equals(ECurrency.UAH)) {
+                        BigDecimal uahprice = BigDecimal.valueOf(carUser.getPrice());
+                        BigDecimal usdprice = uahprice.divide(usdSale, 2, RoundingMode.HALF_UP);
+                        response.put("price in usd:", usdprice);
+                        response.put("usd currency", usdSale);
+                        response.put("seller price in uah:", carUser.getPrice());
+
+                    }
+                } else if (currency.equalsIgnoreCase("uah")) {
+                    if (carUser.getEcurrency().equals(ECurrency.UAH)) {
+                        response.put("price", carUser.getPrice());
+                    } else if (carUser.getEcurrency().equals(ECurrency.EUR)) {
+                        BigDecimal eurprice = BigDecimal.valueOf(carUser.getPrice());
+                        BigDecimal uahprice = eurprice.multiply(eurprice);
+                        response.put("price in uah:", uahprice);
+                        response.put("eur currency", eurSale);
+                        response.put("seller price in eur:", carUser.getPrice());
+                    } else if (carUser.getEcurrency().equals(ECurrency.USD)) {
+                        BigDecimal usdprice = BigDecimal.valueOf(carUser.getPrice());
+                        BigDecimal uahprice = usdprice.multiply(usdSale);
+                        response.put("price in uah:", uahprice);
+                        response.put("usd currency", usdSale);
+                        response.put("seller price in usd:", carUser.getPrice());
+
+                    }
+
+                } else {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else if (currency==null){
+                response.put("brand", carUser.getBrand());
+                response.put("model", carUser.getModel());
                 response.put("price", carUser.getPrice());
-            } else if (carUser.getEcurrency().equals(ECurrency.UAH)) {
-                BigDecimal uahprice = BigDecimal.valueOf(carUser.getPrice());
-                BigDecimal divide = uahprice.divide(eurSale, 2, RoundingMode.HALF_UP);
-                response.put("price in eur:", divide);
-                response.put("euro currency", eurSale);
-                response.put("seller price in UAH:", carUser.getPrice());
-            }
-        } else if (currency.equalsIgnoreCase("usd")) {
-            if (carUser.getEcurrency().equals(ECurrency.USD)) {
-                response.put("price", carUser.getPrice());
-            } else if (carUser.getEcurrency().equals(ECurrency.EUR)) {
-                BigDecimal eurprice = BigDecimal.valueOf(carUser.getPrice());
-                BigDecimal uahprice = eurprice.multiply(eurSale);
-                BigDecimal usdprice = uahprice.divide(usdSale, 2, RoundingMode.HALF_UP);
-                response.put("price in usd:", usdprice);
-                response.put("usd currency", usdSale);
-                response.put("seller price in eur:", carUser.getPrice());
-
-            } else if (carUser.getEcurrency().equals(ECurrency.UAH)) {
-                BigDecimal uahprice = BigDecimal.valueOf(carUser.getPrice());
-                BigDecimal usdprice = uahprice.divide(usdSale, 2, RoundingMode.HALF_UP);
-                response.put("price in usd:", usdprice);
-                response.put("usd currency", usdSale);
-                response.put("seller price in uah:", carUser.getPrice());
-
-            }
-        } else if (currency.equalsIgnoreCase("uah")) {
-            if (carUser.getEcurrency().equals(ECurrency.UAH)) {
-                response.put("price", carUser.getPrice());
-            } else if (carUser.getEcurrency().equals(ECurrency.EUR)) {
-                BigDecimal eurprice = BigDecimal.valueOf(carUser.getPrice());
-                BigDecimal uahprice = eurprice.multiply(eurprice);
-                response.put("price in uah:", uahprice);
-                response.put("eur currency", eurSale);
-                response.put("seller price in eur:", carUser.getPrice());
-            } else if (carUser.getEcurrency().equals(ECurrency.USD)) {
-                BigDecimal usdprice = BigDecimal.valueOf(carUser.getPrice());
-                BigDecimal uahprice = usdprice.multiply(usdSale);
-                response.put("price in uah:", uahprice);
-                response.put("usd currency", usdSale);
-                response.put("seller price in usd:", carUser.getPrice());
-
+                response.put("currency", carUser.getEcurrency());
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else  {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
-        } else {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+           return null;
+    }
+    @GetMapping("/allcars")
+    public ResponseEntity<List<Map<String, Object>>> getCarsByBrandOrRegion(
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String region) {
+        if (brand==null&&region==null) {
+            List<CarUser> carList = carRepository.findAll();
+            List<Map<String, Object>> carInfoList = new ArrayList<>();
+
+            for (CarUser car : carList) {
+                Map<String, Object> carInfo = new HashMap<>();
+                carInfo.put("price", car.getPrice());
+                carInfo.put("model", car.getModel());
+                carInfo.put("brand", car.getBrand());
+                carInfo.put("currency", car.getEcurrency());
+                carInfoList.add(carInfo);
+            }
+            return new ResponseEntity<>(carInfoList, HttpStatus.OK);
         }
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    } else {
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-}
 
+        if (brand != null && region==null) {
+            List<CarUser> carList = carRepository.findByBrand(brand);
+            List<Map<String, Object>> carInfoList = new ArrayList<>();
 
-
-    @GetMapping("/allcars/brand/{brand}")
-    public ResponseEntity<List<Map<String, Object>>> getCarsByBrand(@PathVariable String brand) {
-        List<CarUser> carList = carRepository.findByBrand(brand);
-        List<Map<String, Object>> carInfoList = new ArrayList<>();
-
-        for (CarUser car : carList) {
-            Map<String, Object> carInfo = new HashMap<>();
-            carInfo.put("price", car.getPrice());
-            carInfo.put("model", car.getModel());
-            carInfo.put("brand", car.getBrand());
-            carInfoList.add(carInfo);
+            for (CarUser car : carList) {
+                Map<String, Object> carInfo = new HashMap<>();
+                carInfo.put("price", car.getPrice());
+                carInfo.put("model", car.getModel());
+                carInfo.put("brand", car.getBrand());
+                carInfo.put("currency",car.getEcurrency());
+                carInfoList.add(carInfo);
+            }
+            return new ResponseEntity<>(carInfoList, HttpStatus.OK);
         }
-        return new ResponseEntity<>(carInfoList, HttpStatus.OK);
+
+        if (region != null && brand==null) {
+            List<CarUser> carList = carRepository.getByRegion(region);
+            List<Map<String, Object>> carInfoList = carList.stream()
+                    .map(car -> {
+                        Map<String, Object> carInfo = new HashMap<>();
+                        carInfo.put("price", car.getPrice());
+                        carInfo.put("model", car.getModel());
+                        carInfo.put("brand", car.getBrand());
+                        carInfo.put("currency", car.getEcurrency());
+                        return carInfo;
+                    })
+                    .collect(Collectors.toList());
+
+            return new ResponseEntity<>(carInfoList, HttpStatus.OK);
+        }
+        if (brand != null && region != null) {
+            List<CarUser> carList = carRepository.findByRegionAndBrand(region, brand);
+            List<Map<String, Object>> carInfoList = carList.stream()
+                    .map(car -> {
+                        Map<String, Object> carInfo = new HashMap<>();
+                        carInfo.put("price", car.getPrice());
+                        carInfo.put("model", car.getModel());
+                        carInfo.put("brand", car.getBrand());
+                        carInfo.put("currency", car.getEcurrency());
+                        return carInfo;
+                    }).toList();
+            return new ResponseEntity<>(carInfoList,HttpStatus.OK);
+        }
+
+
+            return null;
     }
 
 
 
 
-
-    @GetMapping("allcars/region/{region}")
-    public ResponseEntity<List<Map<String, Object>>> getCarsByRegion(@PathVariable String region) {
-        List<CarUser> carList = carRepository.getByRegion(region);
-
-        List<Map<String, Object>> carInfoList = carList.stream()
-                .map(car -> {
-                    Map<String, Object> carInfo = new HashMap<>();
-                    carInfo.put("price", car.getPrice());
-                    carInfo.put("model", car.getModel());
-                    carInfo.put("brand", car.getBrand());
-                    carInfo.put("currency", car.getEcurrency());
-                    return carInfo;
-                })
-                .collect(Collectors.toList());
-
-        return new ResponseEntity<>(carInfoList, HttpStatus.OK);
-    }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MODER')")
     public void deleteCar(@PathVariable long id) {
         carRepository.deleteById(id);
     }
+
     @PreAuthorize("hasRole('UP_SELLER')")
     @GetMapping("/region/midprice/{region}/{brand}")
     public ResponseEntity<Map<String, Double>> getMidPriceByRegionAndBrand(@PathVariable String region, @PathVariable String brand) {
