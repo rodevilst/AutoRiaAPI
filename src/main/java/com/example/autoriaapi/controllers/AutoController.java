@@ -139,35 +139,37 @@ public class AutoController {
         }
     }
 
-    @GetMapping("/{id}/eur")
-    public ResponseEntity<Map<String, Object>> getCarByIdInEur(@PathVariable long id) {
-        Optional<CarUser> optionalCarUser = carRepository.findById(id);
-        if (optionalCarUser.isPresent()) {
-            CarUser carUser = optionalCarUser.get();
-            int view = carUser.getView();
-            carUser.setLastViewTime(LocalDateTime.now());
-            carUser.setView(++view);
-            carRepository.save(carUser);
+@GetMapping("/{id}/cur")
+public ResponseEntity<Map<String, Object>> getCarByIdCurrency(@PathVariable long id, @RequestParam String currency) {
+    Optional<CarUser> optionalCarUser = carRepository.findById(id);
+    if (optionalCarUser.isPresent()) {
+        CarUser carUser = optionalCarUser.get();
+        int view = carUser.getView();
+        carUser.setLastViewTime(LocalDateTime.now());
+        carUser.setView(++view);
+        carRepository.save(carUser);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("brand", carUser.getBrand());
-            response.put("model", carUser.getModel());
-            response.put("currency", carUser.getEcurrency());
-            System.out.println(response);
-            List<Currency> all = currencyRepository.findAll();
-            Currency eur = all.get(0);
-            Currency usd = all.get(1);
-            BigDecimal eurSale = eur.getSale();
-            BigDecimal usdSale = usd.getSale();
-            if (carUser.getEcurrency().equals(ECurrency.EUR)) {
-                response.put("price", carUser.getPrice());
-            } else if (carUser.getEcurrency().equals(ECurrency.USD)) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("brand", carUser.getBrand());
+        response.put("model", carUser.getModel());
+        response.put("currency", carUser.getEcurrency().toString());
+
+        List<Currency> all = currencyRepository.findAll();
+        Currency eur = all.get(0);
+        Currency usd = all.get(1);
+        BigDecimal eurSale = eur.getSale();
+        BigDecimal usdSale = usd.getSale();
+
+        if (currency.equalsIgnoreCase("eur")) {
+            if (carUser.getEcurrency().equals(ECurrency.USD)) {
                 BigDecimal usdprice = BigDecimal.valueOf(carUser.getPrice());
                 BigDecimal uah = usdprice.multiply(usdSale);
                 BigDecimal eurprice = uah.divide(eurSale, 2, RoundingMode.HALF_UP);
                 response.put("price in eur:", eurprice);
                 response.put("euro currency", eurSale);
                 response.put("seller price in usd:", carUser.getPrice());
+            } else if (carUser.getEcurrency().equals(ECurrency.EUR)) {
+                response.put("price", carUser.getPrice());
             } else if (carUser.getEcurrency().equals(ECurrency.UAH)) {
                 BigDecimal uahprice = BigDecimal.valueOf(carUser.getPrice());
                 BigDecimal divide = uahprice.divide(eurSale, 2, RoundingMode.HALF_UP);
@@ -175,32 +177,7 @@ public class AutoController {
                 response.put("euro currency", eurSale);
                 response.put("seller price in UAH:", carUser.getPrice());
             }
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @GetMapping("/{id}/usd")
-    public ResponseEntity<Map<String, Object>> getCarByIdInUsd(@PathVariable long id) {
-        Optional<CarUser> optionalCarUser = carRepository.findById(id);
-        if (optionalCarUser.isPresent()) {
-            CarUser carUser = optionalCarUser.get();
-            int view = carUser.getView();
-            carUser.setLastViewTime(LocalDateTime.now());
-            carUser.setView(++view);
-            carRepository.save(carUser);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("brand", carUser.getBrand());
-            response.put("model", carUser.getModel());
-            response.put("currency", carUser.getEcurrency());
-            System.out.println(response);
-            List<Currency> all = currencyRepository.findAll();
-            Currency eur = all.get(0);
-            Currency usd = all.get(1);
-            BigDecimal eurSale = eur.getSale();
-            BigDecimal usdSale = usd.getSale();
+        } else if (currency.equalsIgnoreCase("usd")) {
             if (carUser.getEcurrency().equals(ECurrency.USD)) {
                 response.put("price", carUser.getPrice());
             } else if (carUser.getEcurrency().equals(ECurrency.EUR)) {
@@ -219,32 +196,7 @@ public class AutoController {
                 response.put("seller price in uah:", carUser.getPrice());
 
             }
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @GetMapping("/{id}/uah")
-    public ResponseEntity<Map<String, Object>> getCarByIdInUah(@PathVariable long id) {
-        Optional<CarUser> optionalCarUser = carRepository.findById(id);
-        if (optionalCarUser.isPresent()) {
-            CarUser carUser = optionalCarUser.get();
-            int view = carUser.getView();
-            carUser.setLastViewTime(LocalDateTime.now());
-            carUser.setView(++view);
-            carRepository.save(carUser);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("brand", carUser.getBrand());
-            response.put("model", carUser.getModel());
-            response.put("currency", carUser.getEcurrency());
-            System.out.println(response);
-            List<Currency> all = currencyRepository.findAll();
-            Currency eur = all.get(0);
-            Currency usd = all.get(1);
-            BigDecimal eurSale = eur.getSale();
-            BigDecimal usdSale = usd.getSale();
+        } else if (currency.equalsIgnoreCase("uah")) {
             if (carUser.getEcurrency().equals(ECurrency.UAH)) {
                 response.put("price", carUser.getPrice());
             } else if (carUser.getEcurrency().equals(ECurrency.EUR)) {
@@ -261,11 +213,16 @@ public class AutoController {
                 response.put("seller price in usd:", carUser.getPrice());
 
             }
-            return new ResponseEntity<>(response, HttpStatus.OK);
+
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    } else {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+}
+
 
 
     @GetMapping("/allcars/brand/{brand}")
@@ -284,11 +241,7 @@ public class AutoController {
     }
 
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('MODER')")
-    public void deleteCar(@PathVariable long id) {
-        carRepository.deleteById(id);
-    }
+
 
 
     @GetMapping("allcars/region/{region}")
@@ -309,6 +262,11 @@ public class AutoController {
         return new ResponseEntity<>(carInfoList, HttpStatus.OK);
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MODER')")
+    public void deleteCar(@PathVariable long id) {
+        carRepository.deleteById(id);
+    }
     @PreAuthorize("hasRole('UP_SELLER')")
     @GetMapping("/region/midprice/{region}/{brand}")
     public ResponseEntity<Map<String, Double>> getMidPriceByRegionAndBrand(@PathVariable String region, @PathVariable String brand) {
